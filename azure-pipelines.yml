@@ -1,44 +1,43 @@
+# azure-pipelines.yml
+# Maven Build Pipeline for Java Project
+
 trigger:
-- main   # or your default branch
+  - main   # Runs pipeline when code is pushed to 'main' branch
 
 pool:
   vmImage: 'ubuntu-latest'
 
+variables:
+  mavenOpts: '-Xmx1024m'
+
 steps:
-# 1. Use Java
-- task: JavaToolInstaller@0
-  inputs:
-    versionSpec: '11'
-    jdkArchitecture: 'x64'
-    jdkSourceOption: 'PreInstalled'
+  # Step 1: Checkout code
+  - task: Checkout@1
+    displayName: 'Checkout source code'
 
+  # Step 2: Setup Java (JDK 17)
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '17'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
 
-# 2. Cache Maven dependencies (optional but speeds up builds)
-- task: Cache@2
-  inputs:
-    key: 'maven | "$(Agent.OS)" | **/pom.xml'
-    restoreKeys: |
-      maven | "$(Agent.OS)"
-    path: ~/.m2/repository
+  # Step 3: Build with Maven
+  - task: Maven@3
+    displayName: 'Build with Maven'
+    inputs:
+      mavenPomFile: 'pom.xml'
+      goals: 'clean install'
+      options: '$(mavenOpts)'
+      javaHomeOption: 'Path'
+      mavenVersionOption: 'Default'
+      publishJUnitResults: true
+      testResultsFiles: '**/surefire-reports/TEST-*.xml'
 
-# 3. Run Maven build
-- task: Maven@4
-  inputs:
-    mavenPomFile: 'pom.xml'
-    goals: 'clean install'
-    options: '-Xmx1024m'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    javaHomeOption: 'Path'
-    jdkDirectory: '/usr/lib/jvm/adoptopenjdk-11-hotspot-amd64'
-    mavenVersionOption: 'Default'
-    mavenAuthenticateFeed: false
-    effectivePomSkip: false
-    sonarQubeRunAnalysis: false
-
-# 4. Publish Build Artifacts
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(System.DefaultWorkingDirectory)/target'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+  # Step 4: Publish build artifacts (JAR)
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact'
+    inputs:
+      PathtoPublish: '$(System.DefaultWorkingDirectory)/target'
+      ArtifactName: 'drop'
+      publishLocation: 'Container'
