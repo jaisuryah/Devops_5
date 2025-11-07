@@ -9,10 +9,10 @@ steps:
 - task: Maven@4
   inputs:
     mavenPomFile: 'pom.xml'
-    goals: 'clean package'
-    javaHomeOption: 'Path'
-    jdkDirectory: $(JAVA_HOME)
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    mavenOptions: '-Xmx3072m'
-  displayName: 'Build with Maven'
+    javaHomeOption: 'JDKVersion'
+    mavenVersionOption: 'Default'
+    mavenAuthenticateFeed: false
+    effectivePomSkip: false
+    sonarQubeRunAnalysis: false
