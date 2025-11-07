@@ -5,14 +5,6 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-# Step 1: Install and use JDK 22
-- task: JavaToolInstaller@0
-  inputs:
-    versionSpec: '22'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: 'PreInstalled'
-  displayName: 'Set up Java 22'
-
 # Step 2: Run Maven build
 - task: Maven@4
   inputs:
